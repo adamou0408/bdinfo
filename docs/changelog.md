@@ -36,3 +36,6 @@
 | 2026-04-06 | 狀態變更 | `specs/market-development-tool/spec.md` | draft → in-review → **approved**（v1.3） |
 | 2026-04-06 | 新增 | `reviews/REVIEW-market-development-tool-2026-04-06.md` | 審核通過（15/16 項通過，技術負責人待指派） |
 | 2026-04-06 | 更新 | `specs/market-development-tool/spec.md` | 調整成功指標 #2 為內容行銷相關指標 |
+| 2026-04-06 | 新增 | `specs/market-development-tool/plan.md` | 技術方案：XL 複雜度，14 任務，4 階段實施 |
+| 2026-04-06 | 新增 | `specs/market-development-tool/tasks.md` | 任務拆解：14 任務，2 個並行 group |
+| 2026-04-06 | 新增 | `specs/market-development-tool/contracts.md` | API 合約：15 個端點，7 張資料表 |
