@@ -1,0 +1,169 @@
+// Spec: specs/market-development-tool/spec.md
+// Task: specs/market-development-tool/tasks.md — Task 2
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PipelineStage {
+  discovered
+  contacted
+  communicating
+  proposed
+  closed_won
+  closed_lost
+}
+
+enum InteractionType {
+  note
+  message
+  meeting
+  proposal
+  call
+  social_engagement
+}
+
+enum ContentType {
+  case_study
+  industry_insight
+  tech_guide
+  success_story
+}
+
+enum ContentStatus {
+  draft
+  pending_review
+  approved
+  published
+  archived
+}
+
+enum InsightReportType {
+  weekly_summary
+  trend_analysis
+  industry_report
+}
+
+enum UserRole {
+  admin
+  market_developer
+  viewer
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  passwordHash String        @map("password_hash")
+  role         UserRole      @default(market_developer)
+  interactions Interaction[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Lead {
+  id                    String        @id @default(uuid())
+  companyName           String        @map("company_name")
+  industry              String?
+  scale                 String?
+  contactInfo           String?       @map("contact_info") // AES-256 encrypted JSON
+  source                String
+  sourceUrl             String?       @map("source_url")
+  digitalMaturity       String?       @map("digital_maturity")
+  pipelineStage         PipelineStage @default(discovered) @map("pipeline_stage")
+  tags                  String[]      @default([])
+  privacyNoticeSent     Boolean       @default(false) @map("privacy_notice_sent")
+  dataDeletionRequested Boolean       @default(false) @map("data_deletion_requested")
+  lastInteractionAt     DateTime?     @map("last_interaction_at")
+  expiresAt             DateTime?     @map("expires_at")
+  interactions          Interaction[]
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  @@map("leads")
+}
+
+model Interaction {
+  id        String          @id @default(uuid())
+  leadId    String          @map("lead_id")
+  lead      Lead            @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      InteractionType
+  channel   String?
+  summary   String?
+  result    String?
+  createdBy String?         @map("created_by")
+  creator   User?           @relation(fields: [createdBy], references: [id])
+  metadata  Json?
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  @@map("interactions")
+}
+
+model Content {
+  id                String        @id @default(uuid())
+  title             String
+  body              String
+  contentType       ContentType   @map("content_type")
+  targetIndustry    String?       @map("target_industry")
+  status            ContentStatus @default(draft)
+  scheduledAt       DateTime?     @map("scheduled_at")
+  publishedAt       DateTime?     @map("published_at")
+  platform          String?
+  engagementMetrics Json?         @map("engagement_metrics")
+  aiGenerated       Boolean       @default(true) @map("ai_generated")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@map("content")
+}
+
+model Insight {
+  id          String            @id @default(uuid())
+  reportType  InsightReportType @map("report_type")
+  periodStart DateTime          @map("period_start") @db.Date
+  periodEnd   DateTime          @map("period_end") @db.Date
+  data        Json
+  summary     String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("insights")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?  @map("user_id")
+  user         User?    @relation(fields: [userId], references: [id])
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  details      Json?
+  ipAddress    String?  @map("ip_address")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model PortfolioCase {
+  id                  String   @id @default(uuid())
+  title               String
+  clientIndustry      String?  @map("client_industry")
+  problemDescription  String?  @map("problem_description")
+  solutionDescription String?  @map("solution_description")
+  results             String?
+  testimonial         String?
+  isPublic            Boolean  @default(true) @map("is_public")
+  displayOrder        Int      @default(0) @map("display_order")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("portfolio_cases")
+}

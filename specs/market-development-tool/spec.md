@@ -1,6 +1,6 @@
 # 持續開拓市場工具（Market Development Tool）
 
-## 狀態：`approved`
+## 狀態：`done`
 
 ## 版本歷史
 | 版本 | 日期 | 變更摘要 | 觸發者 |
@@ -9,6 +9,8 @@
 | v1.1 | 2026-04-06 | 納入用戶回覆：目標傳統產業、社群媒體管道、繁中、無既有 CRM | 用戶回覆 |
 | v1.2 | 2026-04-06 | 解��� 3 個衝突：��群互動優先、完整蒐集+合規、完整���蹤+透明告��� | /resolve-conflict |
 | v1.3 | 2026-04-06 | 審核通過，狀態 approved；調整成功指標 #2 為內容行銷指標 | /review |
+| v2.0 | 2026-04-06 | 開始實作，狀態 in-progress | /implement |
+| v2.1 | 2026-04-06 | 實作完成，14/14 任務通過，狀態 done | /implement |
 
 ## 來源追溯
 - 原始需求：[intake/raw/2026-04-06-market-development-tool.md](../../intake/raw/2026-04-06-market-development-tool.md)
