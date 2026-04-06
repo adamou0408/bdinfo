@@ -82,8 +82,9 @@
   - [ ] 支援客戶證言或推薦信
 
 ## 衝突標記
-- ⚠️ 市場開發者需要「廣泛自動化外展」，但潛在客戶需要「個性化且不打擾的溝通」→ 待 `/detect-conflicts` 評估
-- ⚠️ 市場開發者需要「蒐集詳細客戶資料」，但潛在客戶在乎「隱私與資料保護」→ 待 `/detect-conflicts` 評估
+- ⚠️ **CONFLICT-001**：自動化外展效率 vs. 個性化溝通品質（US-MD-002 ↔ US-PC-001）→ 見 [conflicts/CONFLICT-001.md](../../conflicts/CONFLICT-001.md)
+- ⚠️ **CONFLICT-002**：客戶資料蒐集 vs. 隱私保護與個資合規（US-MD-001 ↔ US-PC-001）→ 見 [conflicts/CONFLICT-002.md](../../conflicts/CONFLICT-002.md)
+- ⚠️ **CONFLICT-003**：詳盡銷售追蹤 vs. 自然溝通體驗（US-MD-003 ↔ US-PC-001）→ 見 [conflicts/CONFLICT-003.md](../../conflicts/CONFLICT-003.md)
 
 ## 非功能需求
 - 效能：潛在客戶名單更新延遲不超過 24 小時；儀表板載入時間 < 3 秒
