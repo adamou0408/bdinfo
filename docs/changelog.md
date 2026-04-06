@@ -33,3 +33,6 @@
 | 2026-04-06 | 解決 | `conflicts/CONFLICT-002.md` | 決議：完整資料蒐集 + 嚴格合規框架 |
 | 2026-04-06 | 解決 | `conflicts/CONFLICT-003.md` | 決議：完整追蹤 + 透明告知 |
 | 2026-04-06 | 更新 | `specs/market-development-tool/spec.md` | v1.2：依衝突決議調整 User Stories 與需求 |
+| 2026-04-06 | 狀態變更 | `specs/market-development-tool/spec.md` | draft → in-review → **approved**（v1.3） |
+| 2026-04-06 | 新增 | `reviews/REVIEW-market-development-tool-2026-04-06.md` | 審核通過（15/16 項通過，技術負責人待指派） |
+| 2026-04-06 | 更新 | `specs/market-development-tool/spec.md` | 調整成功指標 #2 為內容行銷相關指標 |
