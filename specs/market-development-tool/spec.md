@@ -1,6 +1,6 @@
 # 持續開拓市場工具（Market Development Tool）
 
-## 狀態：`draft`
+## 狀態：`in-review`
 
 ## 版本歷史
 | 版本 | 日期 | 變更摘要 | 觸發者 |
