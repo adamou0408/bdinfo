@@ -34,29 +34,31 @@ AI 整理好之後，會請你（或負責人）看一下是否正確。確認�
 
 ## 流程總覽
 
+> 下圖的 `intake/`、`specs/`、`src/` 是邏輯名稱;實際位置依安裝模式而定(Init 模式在專案根目錄;Submodule 模式在 `.req/` 下,生成的程式碼仍落在 host repo 原本的 `src/`、`tests/`)。完整說明見 [docs/installation.md](docs/installation.md)。
+
 ```mermaid
 graph TD
-    A[👤 任何人提交原始需求] -->|intake/| R[🔍 AI 調研去重]
-    R -->|重複| A2[合併至現有 spec]
-    R -->|全新| B[🤖 AI 轉譯]
+    A[👤 任何人提交原始需求] -->|/req-intake| R[🔍 /req-research 調研去重]
+    R -->|重複| A2[/req-iterate 合併至現有 spec]
+    R -->|全新| B[🤖 /req-translate 轉譯]
     B --> C[📋 結構化規格 spec.md]
     B --> D[👥 自動識別/更新角色 personas/]
-    B --> E{⚠️ 衝突偵測}
+    B --> E{⚠️ /req-detect-conflicts}
     E -->|有衝突| F[conflicts/ 標記衝突]
-    F --> G[👤 人類裁決 resolve-conflict]
+    F --> G[👤 /req-resolve-conflict 人類裁決]
     G --> C
     E -->|無衝突| C
-    C --> H[👤 人類審核 review]
+    C --> H[👤 /req-review 人類審核]
     H -->|退回| A
-    H -->|通過| I[🤖 AI 生成技術方案 plan.md]
-    I --> J[🤖 AI 拆解任務 tasks.md]
-    J --> K[🤖 AI 實作程式碼 src/]
+    H -->|通過| I[🤖 /req-plan 技術方案]
+    I --> J[🤖 /req-plan 拆解 tasks.md]
+    J --> K[🤖 /req-implement 寫碼]
     K --> L[🧪 自動化測試 tests/]
     L -->|失敗| K
     L -->|通過| L2[🔒 安全掃描 + 程式碼審查]
-    L2 -->|通過| M[🚀 自動部署]
+    L2 -->|通過| M[🚀 /req-deploy]
     M --> N[📡 持續監控]
-    N -->|發現問題| O[🔄 自動回報]
+    N -->|發現問題| O[🔄 /req-feedback 自動回報]
     O --> A
     N -->|正常| P[✅ 持續運行]
     P -.->|需求變更| A
@@ -64,48 +66,82 @@ graph TD
 
 ### 流程說明
 
-| 階段 | 誰負責 | 做什麼 |
-|------|--------|--------|
-| 提需求 | **你** | 用任何方式說出你想要什麼 |
-| 調研去重 | AI | 檢查是否有重複需求，評估可行性 |
-| 轉譯 | AI | 把你的話整理成結構化規格 |
-| 衝突偵測 | AI | 找出不同角色之間的需求矛盾 |
-| 裁決衝突 | **人類** | 透過結構化決策框架解決衝突 |
-| 審核 | **人類** | 確認 AI 整理的規格是否正確（含安全性） |
-| 開發 | AI | 自動寫程式 |
-| 測試 | AI | 自動測試，有問題自動修正 |
-| 安全掃描 | AI | 掃描密鑰洩漏、依賴漏洞 |
-| 程式碼審查 | AI + **人類** | 審查生成的程式碼品質與安全性 |
-| 部署 | AI + **人類** | 自動部署，正式環境需要人確認 |
-| 監控 | AI | 持續監控，發現問題自動回報成新需求 |
-| 迭代 | **你** | 想改什麼隨時說，流程會重新跑 |
+| 階段 | 指令 | 誰負責 | 做什麼 |
+|------|------|--------|--------|
+| 提需求 | `/req-intake` | **你** | 用任何方式說出你想要什麼 |
+| 調研去重 | `/req-research` | AI | 檢查是否有重複需求,評估可行性(由 `req-research` subagent 執行) |
+| 轉譯 | `/req-translate` | AI | 把你的話整理成結構化 `spec.md` |
+| 衝突偵測 | `/req-detect-conflicts` | AI | 找出不同角色之間的需求矛盾(由 `req-conflict-detector` subagent 執行) |
+| 裁決衝突 | `/req-resolve-conflict` | **人類** | 透過結構化決策框架解決衝突(彈出選項視窗) |
+| 審核 | `/req-review` | **人類** | 確認 AI 整理的規格是否正確(含安全性,彈出 Approve/Reject 視窗) |
+| 技術方案 | `/req-plan` | AI + **人類** | AI 產 `plan.md`/`tasks.md`,結束時呼叫 `ExitPlanMode` 等人按核准 |
+| 開發 | `/req-implement` | AI | 自動寫程式 + 測試;測試失敗自動修最多 3 次 |
+| 部署 | `/req-deploy` | AI + **人類** | 跑 health check,正式環境需要人確認 |
+| 監控/回報 | `/req-feedback` | AI | 持續監控,發現問題自動回報成新 intake |
+| 迭代 | `/req-iterate` | **你** | 想改什麼隨時說,流程會重新跑 |
+| 修補(fixup) | `/req-iterate --fixup` | **你** + AI | L2/L3 的事後補救網:對單一 `done` spec 做 patch-level 修補,只能填補既有 acceptance criteria 的漂移,micro-plan 上限 5 task |
+| 漂移偵測 | `/req-audit` | AI | Read-only 掃描所有 `done` spec 的 spec↔code 漂移、`TODO(auto)` 殘留、`[autonomy: auto]` changelog 條目;`--iterate` 模式會把每條 drift 串到 `/req-iterate --fixup` |
+| 切換自主程度 | `/req-autonomy` | **你** | 三級切換 `strict` / `balanced` / `auto`,預設 `strict` 全部要人。L2/L3 必須搭配 `/req-audit` + `/req-iterate --fixup` 當補救網(詳見 [docs/installation.md](docs/installation.md)) |
+| Onboarding(選配) | `/req-onboard` | AI | 在既有 repo 安裝後跑一次,掃描 host code 產出 personas + feature inventory + project context,給後續 `/req-*` 當 baseline。三個深度 `shallow` / `medium` / `deep`,預設 `medium`。 |
 
 ---
 
-## 專案結構簡介
+## 本 repo 結構
+
+這個 repo 是**框架本體**,不是需求專案。實際只有三個目錄:
 
 | 資料夾 | 用途 |
 |--------|------|
-| `intake/` | 📥 放你的原始需求（任何人都可以放） |
-| `personas/` | 👥 使用者角色定義 |
-| `specs/` | 📋 AI 整理好的結構化規格 |
-| `conflicts/` | ⚠️ 需求衝突紀錄 |
-| `reviews/` | ✅ 審核紀錄 |
-| `src/` | 💻 AI 生成的程式碼 |
-| `tests/` | 🧪 自動化測試 |
-| `infra/` | 🏗️ 基礎設施定義（自動部署用） |
-| `docs/` | 📖 專案文件 |
+| `framework/` | 框架核心:`commands/`(12 個 `req-*` slash 指令)、`agents/`(`req-research`、`req-conflict-detector` 兩個 subagent)、`scripts/`(安裝/同步)、`templates/`(spec/intake/persona 範本 + `settings.json` permissions 模板)、`config/` |
+| `examples/` | 參考範例(personas 等),不會被安裝到下游專案 |
+| `docs/` | 框架自身文件,含 [installation.md](docs/installation.md)、[metrics.md](docs/metrics.md)、[speckit-comparison.md](docs/speckit-comparison.md) |
+
+> 安裝後在你自己的需求專案裡才會出現的 `intake/`、`specs/`、`personas/`、`conflicts/`、`reviews/`、`src/`、`tests/` 等業務目錄,說明見 [docs/installation.md](docs/installation.md)。
 
 ---
 
 ## 快速開始
 
-準備好了嗎？你的第一步就是提出你的需求！
+這個 repo 既是**框架本體**,也是**可初始化的需求專案範本**。依照你的場景挑一種安裝方式:
 
-在 Claude Code 中執行：
+### 場景 A:全新需求專案(Init 模式)
 
+```bash
+git clone https://github.com/adamou0408/req /tmp/req-framework
+mkdir my-req-project && cd my-req-project
+bash /tmp/req-framework/framework/scripts/req-init.sh           # 預設 --mode=copy
+git init && git add -A && git commit -m "chore: bootstrap req project"
 ```
-/intake
+
+`req-init.sh` 預設會把 framework 複製成 `./.req-framework/`,並自動建立 `intake/`、`specs/`、`.req.config.yml`、`.claude/commands/req-*.md`、`.claude/agents/req-*.md` 與 `.claude/settings.json`(若 host 已有則不覆蓋)。若想改用 git submodule 連動上游,改執行:
+
+```bash
+cd my-req-project && git init
+bash /tmp/req-framework/framework/scripts/req-init.sh --mode=submodule --remote=https://github.com/adamou0408/req
 ```
 
-AI 會引導你完成整個流程。不用緊張，怎麼說都可以，AI 會幫你整理好的。
+完成後在 Claude Code 中執行 `/req-intake`,AI 會引導你提出第一個需求。
+
+### 場景 B:導入既有 repo(Submodule 模式,零侵入)
+
+```bash
+cd /path/to/your-existing-repo
+git submodule add https://github.com/adamou0408/req .req-framework
+bash .req-framework/framework/scripts/req-add-submodule.sh
+git add .req.config.yml .req .claude/commands/req-*.md .claude/agents/req-*.md .claude/settings.json
+git commit -m "chore: install req framework"
+```
+
+只新增 `.req-framework/`(submodule)、`.req/`(業務資料)、12 個 `req-*.md` slash 指令、2 個 `req-*.md` subagent,以及 `.claude/settings.json`(若你已有則跳過),**完全不動**你的 `src/`、`tests/`、`README.md`、CI。
+
+### 升級到新版
+
+```bash
+git submodule update --remote .req-framework
+bash .req-framework/framework/scripts/req-sync-commands.sh
+git add .req-framework .claude/commands/req-*.md .claude/agents/req-*.md .req.config.yml
+git commit -m "chore: bump req framework"
+```
+
+完整安裝、升級、客製、解除安裝說明見 [docs/installation.md](docs/installation.md)。
+
