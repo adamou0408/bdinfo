@@ -127,6 +127,19 @@
 
 **recommended next step: proceed to `/req-translate`**,但 `/translate` 必須在第一步透過 `AskUserQuestion` 向使用者確認上述「四個歧義點」,尤其是「商業策略」的真實語意(變現 vs 定位),才能產出正確的 spec。
 
+## 🔒 歧義澄清決策(2026-04-08 人類確認)
+
+以下決策由需求提出者於 `/req-research` 完成後、`/req-translate` 執行前透過 `AskUserQuestion` 明確回答,作為本 spec 的輸入前提:
+
+| # | 歧義點 | 人類決策 | 對 spec 的影響 |
+|---|--------|----------|----------------|
+| 1 | 「商業策略」的真實語意 | **A — 純品牌定位/推廣打法**(對標 OpenAlice 實況;不設付費機制) | spec 不含付費模組/SaaS 設計;以品牌敘事、社群信任、USP 強化為核心 |
+| 2 | 推廣範疇 | **A + C**(採用者獲取 + 社群意見領袖經營);**不含 B 貢獻者招募** | spec 僅需建立 open-source-adopter 與 community-champion 兩個新 persona,不需建立 framework-contributor |
+| 3 | 地理/語言範圍 | **雙軸並行**(中文圈 + 英文國際社群同步) | spec 必須納入 i18n 要求:英文 README、英文 landing page、雙語社群內容管線;內容產製器需支援 locale 參數 |
+| 4 | 與 market-development-tool 的資源分配 | **深度共用**(緊密重用既有 content-generator / lead-scraper / prisma models / CRM,僅新增「開發者頻道」適配層) | spec 明確宣告 `前置需求: market-development-tool`;新增的 code 限於 dev-channel 適配器與內容風格變體,不得重造輪子 |
+
+**決策鎖定點**:以上四項為 spec 的**不可變**輸入。若未來需變更,必須透過 `/req-iterate` 更新 spec 版本並重新評估 research。
+
 ---
 
 ## 結構化摘要（供父對話決策使用）
