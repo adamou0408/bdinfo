@@ -1,0 +1,29 @@
+# Spec: specs/market-development-tool/spec.md
+# Task: specs/market-development-tool/tasks.md — Task 14
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: marketdev
+      POSTGRES_PASSWORD: marketdev_password
+      POSTGRES_DB: market_dev_tool
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://marketdev:marketdev_password@db:5432/market_dev_tool?schema=public
+      NEXTAUTH_SECRET: change-this-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
